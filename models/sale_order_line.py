@@ -16,23 +16,23 @@ class SaleOrderLine(models.Model):
         related="product_id.pack_component_price",
     )
 
-    # Campos para paquetes comunes
+    # Fields for common packs
     pack_depth = fields.Integer(
-        "Profundidad", help="Profundidad del producto si es parte de un paquete."
+        "Depth", help="Depth of the product if it is part of a pack."
     )
     pack_parent_line_id = fields.Many2one(
         "sale.order.line",
-        "Paquete",
-        help="El paquete que contiene este producto.",
+        "Pack",
+        help="The pack that contains this product.",
     )
     pack_child_line_ids = fields.One2many(
-        "sale.order.line", "pack_parent_line_id", "Líneas en paquete"
+        "sale.order.line", "pack_parent_line_id", "Lines in pack"
     )
-    pack_modifiable = fields.Boolean(help="El paquete padre es modificable")
+    pack_modifiable = fields.Boolean(help="The parent pack is modifiable")
 
     do_no_expand_pack_lines = fields.Boolean(
         compute="_compute_do_no_expand_pack_lines",
-        help="Este es un campo técnico para verificar si las líneas del paquete deben expandirse",
+        help="This is a technical field in order to check if pack lines has to be expanded",
     )
 
     @api.depends_context("update_prices", "update_pricelist")
@@ -48,29 +48,19 @@ class SaleOrderLine(models.Model):
 
     def expand_pack_line(self, write=False):
         self.ensure_one()
-        # si estamos usando update_pricelist o comprando en ecommerce solo
-        # queremos actualizar precios
+        # if we are using update_pricelist or checking out on ecommerce we
+        # only want to update prices
         vals_list = []
         if self.product_id.pack_ok and self.pack_type == "detailed":
             for subline in self.product_id.get_pack_lines():
                 vals = subline.get_sale_order_line_vals(self, self.order_id)
-                
-                # 🆕 APLICAR LÓGICA DE desglosar_iva DESPUÉS DE OBTENER LOS VALORES
-                if hasattr(self.order_id, 'desglosar_iva') and not self.order_id.desglosar_iva:
-                    # Si desglosar_iva está desactivado y el precio no incluye IVA, aplicarlo
-                    if vals.get("price_unit", 0) > 0:
-                        # Verificar si ya tiene IVA aplicado (evitar duplicación)
-                        original_price = vals["price_unit"]
-                        # Aplicar IVA si no está ya incluido
-                        vals["price_unit"] = original_price * 1.16
-                
                 if write:
                     existing_subline = first(
                         self.pack_child_line_ids.filtered(
                             lambda child: child.product_id == subline.product_id
                         )
                     )
-                    # si la sublínea ya existe la actualizamos, si no la creamos
+                    # if subline already exists we update, if not we create
                     if existing_subline:
                         if self.do_no_expand_pack_lines:
                             vals.pop("product_uom_qty", None)
@@ -85,8 +75,8 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Solo cuando sea estrictamente necesario (un producto es un paquete) se creará línea
-        por línea, esto es necesario para mantener el orden correcto.
+        """Only when strictly necessary (a product is a pack) will be created line
+        by line, this is necessary to maintain the correct order.
         """
         product_ids = [elem.get("product_id") for elem in vals_list]
         products = self.env["product.product"].browse(product_ids)
@@ -98,17 +88,6 @@ class SaleOrderLine(models.Model):
                 res += line
                 if product and product.pack_ok and product.pack_type != "non_detailed":
                     line.expand_pack_line()
-                    
-                    # 🆕 APLICAR LÓGICA DE desglosar_iva DESPUÉS DE EXPANDIR PAQUETE
-                    if hasattr(line.order_id, 'desglosar_iva') and not line.order_id.desglosar_iva:
-                        # Actualizar precios de las líneas hijo para incluir IVA
-                        for child_line in line.pack_child_line_ids:
-                            if child_line.price_unit > 0:
-                                # Verificar si el precio ya incluye IVA comparando con el precio base
-                                base_price = child_line.product_id.list_price or 0
-                                if base_price > 0 and abs(child_line.price_unit - base_price) < 0.01:
-                                    # El precio parece ser el precio base, aplicar IVA
-                                    child_line.price_unit = child_line.price_unit * 1.16
             return res
         else:
             return super().create(vals_list)
@@ -130,12 +109,12 @@ class SaleOrderLine(models.Model):
         "tax_id",
     )
     def check_pack_line_modify(self):
-        """No permitir editar una línea de orden de venta si pertenece a un paquete"""
+        """Do not let to edit a sale order line if this one belongs to pack"""
         if self._origin.pack_parent_line_id and not self._origin.pack_modifiable:
             raise UserError(
                 _(
-                    "No puedes cambiar esta línea porque es parte de un paquete "
-                    "incluido en esta orden"
+                    "You can not change this line because is part of a pack"
+                    " included in this order"
                 )
             )
 
@@ -144,7 +123,7 @@ class SaleOrderLine(models.Model):
             ("id", "in", self.mapped("pack_parent_line_id").mapped("product_id").ids)
         ]
         return {
-            "name": _("Producto Padre"),
+            "name": _("Parent Product"),
             "type": "ir.actions.act_window",
             "res_model": "product.product",
             "view_type": "form",

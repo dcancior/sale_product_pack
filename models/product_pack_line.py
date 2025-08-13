@@ -7,7 +7,7 @@ class ProductPack(models.Model):
     _inherit = "product.pack.line"
 
     sale_discount = fields.Float(
-        "Descuento de venta (%)",
+        "Sale discount (%)",
         digits="Discount",
     )
 
@@ -29,30 +29,15 @@ class ProductPack(models.Model):
         vals = sol._convert_to_write(sol._cache)
         pack_price_types = {"totalized", "ignored"}
         sale_discount = 0.0
-        
-        # Verificar si desglosar_iva está desactivado en la orden padre
-        desglosar_iva = getattr(order, 'desglosar_iva', True)  # Por defecto True si no existe el campo
-        
         if line.product_id.pack_component_price == "detailed":
             sale_discount = 100.0 - (
                 (100.0 - sol.discount) * (100.0 - self.sale_discount) / 100.0
             )
-            
-            # 🔧 AJUSTE: Aplicar IVA directamente al precio si desglosar_iva está desactivado
-            if not desglosar_iva and vals.get("price_unit", 0) > 0:
-                # Si desglosar_iva está desactivado, multiplicar precio por 1.16 (incluir IVA)
-                vals["price_unit"] = vals["price_unit"] * 1.16
-                
         elif (
             line.product_id.pack_type == "detailed"
             and line.product_id.pack_component_price in pack_price_types
         ):
             vals["price_unit"] = 0.0
-            
-        # 🆕 NUEVO: Aplicar IVA también para paquetes no detallados si desglosar_iva está desactivado
-        elif not desglosar_iva and vals.get("price_unit", 0) > 0:
-            vals["price_unit"] = vals["price_unit"] * 1.16
-        
         vals.update(
             {
                 "discount": sale_discount,
@@ -63,6 +48,4 @@ class ProductPack(models.Model):
 
     def get_price(self):
         self.ensure_one()
-        # Obtener el precio base con descuento aplicado
-        base_price = super().get_price() * (1 - self.sale_discount / 100.0)
-        return base_price
+        return super().get_price() * (1 - self.sale_discount / 100.0)
