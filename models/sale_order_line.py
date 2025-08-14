@@ -75,8 +75,8 @@ class SaleOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Only when strictly necessary (a product is a pack) will be created line
-        by line, this is necessary to maintain the correct order.
+        """Solo cuando sea estrictamente necesario (por ejemplo, un producto en un pack) se creará línea por línea. 
+        Esto es necesario para mantener el orden correcto.
         """
         product_ids = [elem.get("product_id") for elem in vals_list]
         products = self.env["product.product"].browse(product_ids)
@@ -109,12 +109,12 @@ class SaleOrderLine(models.Model):
         "tax_id",
     )
     def check_pack_line_modify(self):
-        """Do not let to edit a sale order line if this one belongs to pack"""
+        """No permita editar una línea de orden de venta si esta pertenece al paquete"""
         if self._origin.pack_parent_line_id and not self._origin.pack_modifiable:
             raise UserError(
                 _(
-                    "You can not change this line because is part of a pack"
-                    " included in this order"
+                    "No puedes cambiar esta línea porque es parte de un paquete"
+                    " incluido en este pedido"
                 )
             )
 
@@ -123,7 +123,7 @@ class SaleOrderLine(models.Model):
             ("id", "in", self.mapped("pack_parent_line_id").mapped("product_id").ids)
         ]
         return {
-            "name": _("Parent Product"),
+            "name": _("Producto principal"),
             "type": "ir.actions.act_window",
             "res_model": "product.product",
             "view_type": "form",

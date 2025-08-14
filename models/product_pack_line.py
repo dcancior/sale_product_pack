@@ -7,7 +7,7 @@ class ProductPack(models.Model):
     _inherit = "product.pack.line"
 
     sale_discount = fields.Float(
-        "Sale discount (%)",
+        "Descuento de venta (%)",
         digits="Discount",
     )
 
