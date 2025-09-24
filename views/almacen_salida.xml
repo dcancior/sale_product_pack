@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="stock_picking_form_lock_add_lines" model="ir.ui.view">
+    <field name="name">stock.picking.form.lock.add.lines</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+
+      <!-- MOVES (sin paquete) -->
+      <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
+        <!-- Permite editar cantidades, pero sin crear ni borrar líneas -->
+        <attribute name="editable">bottom</attribute>
+        <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
+      </xpath>
+
+      <!-- MOVES LÍNEA A LÍNEA (operaciones detalladas) -->
+      <xpath expr="//field[@name='move_line_ids']" position="attributes">
+        <!-- Permite editar cantidades, pero sin crear ni borrar líneas -->
+        <attribute name="editable">bottom</attribute>
+        <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
+      </xpath>
+
+    </field>
+  </record>
+</odoo>
