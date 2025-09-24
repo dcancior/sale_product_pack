@@ -12,7 +12,7 @@
     "depends": ["product_pack", "sale"],
     "data": [
         "security/ir.model.access.csv", 
-        "views/product_pack_line_views.xml"
+        "views/product_pack_line_views.xml",
         "views/almacen_salida.xml",
         ],
     "demo": [
