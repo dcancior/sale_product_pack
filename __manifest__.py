@@ -1,5 +1,6 @@
 # Copyright 2019 NaN (http://www.nan-tic.com) - Àngel Àlvarez
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# pylint: skip-file
 {
     "name": "Sale Product Pack",
     "version": "16.0.1.0.3",
