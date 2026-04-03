@@ -13,12 +13,11 @@
         <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
       </xpath>
 
-      <!-- MOVES LÍNEA A LÍNEA (operaciones detalladas) -->
-      <xpath expr="//field[@name='move_ids']" position="attributes">
-        <!-- Permite editar cantidades, pero sin crear ni borrar líneas -->
+      <!-- MOVES LÍNEA A LÍNEA (operaciones detalladas) - Campo no disponible en Odoo 16 -->
+      <!-- <xpath expr="//field[@name='move_ids']" position="attributes">
         <attribute name="editable">bottom</attribute>
         <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
-      </xpath>
+      </xpath> -->
 
     </field>
   </record>
