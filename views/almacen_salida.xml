@@ -14,7 +14,7 @@
       </xpath>
 
       <!-- MOVES LÍNEA A LÍNEA (operaciones detalladas) -->
-      <xpath expr="//field[@name='move_line_ids']" position="attributes">
+      <xpath expr="//field[@name='move_ids']" position="attributes">
         <!-- Permite editar cantidades, pero sin crear ni borrar líneas -->
         <attribute name="editable">bottom</attribute>
         <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
