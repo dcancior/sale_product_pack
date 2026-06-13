@@ -14,11 +14,12 @@
       </xpath>
 
       <!-- MOVES LÍNEA A LÍNEA (operaciones detalladas) -->
+      <!-- Comentado: move_line_ids no existe en stock.view_picking_form en Odoo 16
       <xpath expr="//field[@name='move_line_ids']" position="attributes">
-        <!-- Permite editar cantidades, pero sin crear ni borrar líneas -->
         <attribute name="editable">bottom</attribute>
         <attribute name="options">{'no_create': True, 'no_delete': True}</attribute>
       </xpath>
+      -->
 
     </field>
   </record>
