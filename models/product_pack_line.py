@@ -13,6 +13,19 @@ class ProductPack(models.Model):
 
     def get_sale_order_line_vals(self, line, order):
         self.ensure_one()
+        if self.display_type in ("line_section", "line_note"):
+            return {
+                "order_id": order.id,
+                "sequence": line.sequence,
+                "display_type": self.display_type,
+                "name": self.name or "",
+                "product_id": False,
+                "product_uom_qty": 0.0,
+                "pack_parent_line_id": line.id,
+                "pack_depth": line.pack_depth + 1,
+                "company_id": order.company_id.id,
+                "pack_modifiable": line.product_id.pack_modifiable,
+            }
         quantity = self.quantity * line.product_uom_qty
         line_vals = {
             "order_id": order.id,

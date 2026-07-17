@@ -58,6 +58,9 @@ class SaleOrderLine(models.Model):
                     existing_subline = first(
                         self.pack_child_line_ids.filtered(
                             lambda child: child.product_id == subline.product_id
+                            and (child.display_type or False)
+                            == (subline.display_type or False)
+                            and (not subline.display_type or child.name == subline.name)
                         )
                     )
                     # if subline already exists we update, if not we create
@@ -78,7 +81,9 @@ class SaleOrderLine(models.Model):
         """Solo cuando sea estrictamente necesario (por ejemplo, un producto en un pack) se creará línea por línea. 
         Esto es necesario para mantener el orden correcto.
         """
-        product_ids = [elem.get("product_id") for elem in vals_list]
+        product_ids = [
+            elem.get("product_id") for elem in vals_list if elem.get("product_id")
+        ]
         products = self.env["product.product"].browse(product_ids)
         if any(p.pack_ok and p.pack_type != "non_detailed" for p in products):
             res = self.browse()
