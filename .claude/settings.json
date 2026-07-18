@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mdfind -name \"sale_order.py\")"
+    ]
+  }
+}
